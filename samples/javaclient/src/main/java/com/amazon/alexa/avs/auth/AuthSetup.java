@@ -27,6 +27,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Initializes and owns the two ways to provision this device: via a companion service where this
@@ -39,6 +41,9 @@ public class AuthSetup implements AccessTokenListener {
     private final DeviceConfig deviceConfig;
     private final RegCodeDisplayHandler regCodeDisplayHandler;
     private final Set<AccessTokenListener> accessTokenListeners = new HashSet<>();
+    
+    private boolean provisioningSuccess = false;
+    private Timer provisioningTimer = new Timer(true);
 
     /**
      * Creates an {@link AuthSetup} object.
@@ -93,6 +98,8 @@ public class AuthSetup implements AccessTokenListener {
                 public void run() {
                     try {
                         authManager.startRemoteProvisioning();
+                        provisioningSuccess = true;
+                        provisioningTimer.cancel();
                     } catch (Exception e) {
                         if (e.getMessage().startsWith("InvalidSessionId")) {
                             log.error(
@@ -102,7 +109,27 @@ public class AuthSetup implements AccessTokenListener {
                     }
                 }
             };
-            provisioningThread.start();
+            
+            TimerTask timerTask = new TimerTask() {
+            	@Override
+            	public void run() {
+            		if (!provisioningSuccess) {
+            			try {
+                            authManager.startRemoteProvisioning();
+                            provisioningSuccess = true;
+                            provisioningTimer.cancel();
+                        } catch (Exception e) {
+                            if (e.getMessage().startsWith("InvalidSessionId")) {
+                                log.error(
+                                        "Could not authenticate. Did you sign into Amazon before clicking ok?");
+                            }
+                            log.error("Failed to start companion service client", e);
+                        }
+            		}
+            	}
+            };
+            
+            provisioningTimer.scheduleAtFixedRate(timerTask, 0, 10*1000);
         }
     }
 

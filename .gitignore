@@ -1,1 +1,13 @@
+/vendor
+/node_modules
+Homestead.yaml
+Homestead.json
+.env
+.idea
+public/templates
+storage/app/geoip.mmdb
 .DS_Store
+storage/media
+.buildpath
+.project
+.settings/

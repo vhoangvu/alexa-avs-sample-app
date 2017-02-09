@@ -5,6 +5,9 @@ var config = require("./config");
 
 var auth = {};
 
+var staticSessionId = null;
+var staticRegCode = null;
+
 var sessionIds = [];
 var sessionIdToDeviceInfo = {};
 var regCodeToSessionId = {};
@@ -134,18 +137,22 @@ auth.getRegCode = function(productId, dsn, callback) {
             callback(error("InternalError", "Failure generating code", 500));
             return;
         } else {
-            var regCode = regCodeBuffer.toString('hex');
-            var sessionId = uuid.v4();
-            sessionIds.push(sessionId);
-            regCodeToSessionId[regCode] = sessionId;
-            sessionIdToDeviceInfo[sessionId] = {
-                productId: productId,
-                dsn: dsn,
-            };
+            if (!staticSessionId) {
+            	var regCode = regCodeBuffer.toString('hex');
+            	var sessionId = uuid.v4();
+            	sessionIds.push(sessionId);
+            	regCodeToSessionId[regCode] = sessionId;
+            	sessionIdToDeviceInfo[sessionId] = {
+            			productId: productId,
+            			dsn: dsn,
+            	};
+            	staticSessionId = sessionId;
+            	staticRegCode = regCode;
+            }
 
             reply = {
-                regCode: regCode,
-                sessionId: sessionId,
+                regCode: staticRegCode,
+                sessionId: staticSessionId,
             };
 
             callback(null, reply);
