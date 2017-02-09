@@ -31,7 +31,7 @@ set( CMAKE_THREAD_PREFER_PTHREAD TRUE )
 
 add_executable( wakeWordAgent ${WAKE_WORD_AGENT_SOURCE} )
 
-set_target_properties( wakeWordAgent PROPERTIES COMPILE_FLAGS "-std=c++11" )
+set_target_properties( wakeWordAgent PROPERTIES COMPILE_FLAGS "-std=c++11 -D_GLIBCXX_USE_CXX11_ABI=0" )
 
 target_include_directories( wakeWordAgent PRIVATE ${CMAKE_SOURCE_DIR}/../ext/include )
 
