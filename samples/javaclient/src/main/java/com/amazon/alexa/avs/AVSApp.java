@@ -117,7 +117,9 @@ public class AVSApp
         authSetup.addAccessTokenListener(this);
         authSetup.addAccessTokenListener(controller);
         authSetup.startProvisioningThread();
-
+		
+		addActionField();
+		
         controller.initializeStopCaptureHandler(this);
         controller.startHandlingDirectives();
     }
@@ -137,6 +139,40 @@ public class AVSApp
 
     protected AVSClientFactory getAVSClientFactory(DeviceConfig config) {
         return new AVSClientFactory(config);
+    }
+
+	private void wake() {
+        controller.onUserActivity();
+
+        if (buttonState == ButtonState.START) { // if in idle mode
+            buttonState = ButtonState.STOP;
+            setPlaybackControlEnabled(false);
+
+            RequestListener requestListener = new RequestListener() {
+
+                @Override
+                public void onRequestSuccess() {
+                    // In case we get a response from the server without
+                    // terminating the stream ourselves.
+                    if (buttonState == ButtonState.STOP) {
+                        wake();
+                    }
+                    finishProcessing();
+                }
+
+                @Override
+                public void onRequestError(Throwable e) {
+                    log.error("An error occured creating speech request", e);
+                    System.out.println(e.getMessage());
+                    wake();
+                    finishProcessing();
+                }
+            };
+            controller.startRecording(rmsListener, requestListener);
+        } else { // else we must already be in listening
+            buttonState = ButtonState.PROCESSING;
+            controller.stopRecording(); // stop the recording so the request can complete
+        }   
     }
 
     @Override
@@ -183,5 +219,6 @@ public class AVSApp
     @Override
     public synchronized void onWakeWordDetected() {
         log.info("Wake Word was detected");
+        wake();
     }
 }
