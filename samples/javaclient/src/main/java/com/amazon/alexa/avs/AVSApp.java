@@ -119,6 +119,8 @@ public class AVSApp
         authSetup.addAccessTokenListener(controller);
         authSetup.startProvisioningThread();
         
+        buttonState = ButtonState.START;
+        
         controller.initializeStopCaptureHandler(this);
         controller.startHandlingDirectives();
     }
