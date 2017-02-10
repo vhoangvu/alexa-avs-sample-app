@@ -76,6 +76,7 @@ public class AVSApp
     private JTextField tokenTextField;
     private JProgressBar visualizer;
     private final DeviceConfig deviceConfig;
+    private final RecordingRMSListener rmsListener = this;
 
     private String accessToken;
 
@@ -139,10 +140,6 @@ public class AVSApp
 
     protected AVSClientFactory getAVSClientFactory(DeviceConfig config) {
         return new AVSClientFactory(config);
-    }
-
-	private void addActionField() {
-        final RecordingRMSListener rmsListener = this;
     }
 
 	private void wake() {
