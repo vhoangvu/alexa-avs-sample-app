@@ -129,7 +129,7 @@ public class AuthSetup implements AccessTokenListener {
             	}
             };
             
-            provisioningTimer.scheduleAtFixedRate(timerTask, 0, 10*1000);
+            provisioningTimer.scheduleAtFixedRate(timerTask, 0, 30*1000);
         }
     }
 
