@@ -190,12 +190,13 @@ public class AVSApp
         Thread thread = new Thread() {
             @Override
             public void run() {
-                while (controller.isSpeaking()) {
+                while (buttonState != ButtonState.START || controller.isSpeaking()) {
                     try {
                         Thread.sleep(500);
                     } catch (Exception e) {
                     }
                 }
+                wake();
             }
         };
         thread.start();
@@ -203,7 +204,9 @@ public class AVSApp
 
     @Override
     public void onStopCaptureDirective() {
-        
+        if (buttonState == ButtonState.STOP) {
+            wake();
+        }
     }
 
     @Override
@@ -218,7 +221,7 @@ public class AVSApp
     
     @Override
     public synchronized void onAccessTokenReceived(String accessToken) {
-        
+        this.accessToken = accessToken;
     }
 
     @Override
