@@ -117,10 +117,10 @@ public class AVSApp
         authSetup.addAccessTokenListener(this);
         authSetup.addAccessTokenListener(controller);
         authSetup.startProvisioningThread();
+        
+        addActionField();
 		
-		addActionField();
-		
-        controller.initializeStopCaptureHandler(this);
+		controller.initializeStopCaptureHandler(this);
         controller.startHandlingDirectives();
     }
 
@@ -141,13 +141,16 @@ public class AVSApp
         return new AVSClientFactory(config);
     }
 
+	private void addActionField() {
+        final RecordingRMSListener rmsListener = this;
+    }
+
 	private void wake() {
         controller.onUserActivity();
 
         if (buttonState == ButtonState.START) { // if in idle mode
             buttonState = ButtonState.STOP;
-            setPlaybackControlEnabled(false);
-
+            
             RequestListener requestListener = new RequestListener() {
 
                 @Override
@@ -173,6 +176,11 @@ public class AVSApp
             buttonState = ButtonState.PROCESSING;
             controller.stopRecording(); // stop the recording so the request can complete
         }   
+    }
+    
+    public void finishProcessing() {
+        buttonState = ButtonState.START;
+        controller.processingFinished();
     }
 
     @Override
